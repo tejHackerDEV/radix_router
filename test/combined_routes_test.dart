@@ -30,6 +30,11 @@ void main() {
         path: '/fruits/apple/1234',
         value: 'get apple with 1234 quantity',
       )
+      ..put(
+        method: HttpMethod.get,
+        path: '/fruits/apple/*',
+        value: 'get wildcard apple',
+      )
       ..put(method: HttpMethod.post, path: '/fruit', value: 'post fruit')
       ..put(method: HttpMethod.post, path: '/fruits', value: 'post fruits')
       ..put(method: HttpMethod.post, path: '/fruits/apple', value: 'post apple')
@@ -57,6 +62,11 @@ void main() {
         method: HttpMethod.post,
         path: '/fruits/apple/1234',
         value: 'post apple with 1234 quantity',
+      )
+      ..put(
+        method: HttpMethod.post,
+        path: '/fruits/apple/*',
+        value: 'post wildcard apple',
       );
 
     test('Valid Get test', () {
@@ -101,6 +111,16 @@ void main() {
         radixRouter.lookup(
             method: HttpMethod.get, path: '/fruits/strawberry/1234'),
         'get dynamic fruit name & quantity',
+      );
+      expect(
+        radixRouter.lookup(
+            method: HttpMethod.get, path: '/fruits/apple/random'),
+        'get wildcard apple',
+      );
+      expect(
+        radixRouter.lookup(
+            method: HttpMethod.get, path: '/fruits/apple/1234/1234'),
+        'get wildcard apple',
       );
     });
 
@@ -147,6 +167,16 @@ void main() {
             method: HttpMethod.post, path: '/fruits/strawberry/1234'),
         'post dynamic fruit name & quantity',
       );
+      expect(
+        radixRouter.lookup(
+            method: HttpMethod.post, path: '/fruits/apple/random'),
+        'post wildcard apple',
+      );
+      expect(
+        radixRouter.lookup(
+            method: HttpMethod.post, path: '/fruits/apple/1234/1234'),
+        'post wildcard apple',
+      );
     });
 
     test('Invalid Get test', () {
@@ -169,7 +199,7 @@ void main() {
       );
       expect(
         radixRouter.lookup(
-            method: HttpMethod.get, path: '/fruits/apple/1234/1234'),
+            method: HttpMethod.get, path: '/fruits/pineapple/1234/1234'),
         isNull,
       );
       expect(
@@ -198,18 +228,12 @@ void main() {
       );
       expect(
         radixRouter.lookup(
-            method: HttpMethod.post, path: '/fruits/apple/1234/1234'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(
             method: HttpMethod.post, path: '/fruits/banana/1234'),
         isNull,
       );
     });
 
     test('Clear Get test', () {
-      print(radixRouter);
       radixRouter.clear();
       expect(
         radixRouter.lookup(method: HttpMethod.get, path: '/fruit'),
@@ -246,6 +270,16 @@ void main() {
       );
       expect(
         radixRouter.lookup(method: HttpMethod.get, path: '/fruits/apple/1234'),
+        isNull,
+      );
+      expect(
+        radixRouter.lookup(
+            method: HttpMethod.get, path: '/fruits/apple/random'),
+        isNull,
+      );
+      expect(
+        radixRouter.lookup(
+            method: HttpMethod.get, path: '/fruits/apple/1234/1234'),
         isNull,
       );
     });
@@ -287,6 +321,16 @@ void main() {
       );
       expect(
         radixRouter.lookup(method: HttpMethod.post, path: '/fruits/apple/1234'),
+        isNull,
+      );
+      expect(
+        radixRouter.lookup(
+            method: HttpMethod.post, path: '/fruits/apple/random'),
+        isNull,
+      );
+      expect(
+        radixRouter.lookup(
+            method: HttpMethod.post, path: '/fruits/apple/1234/1234'),
         isNull,
       );
     });

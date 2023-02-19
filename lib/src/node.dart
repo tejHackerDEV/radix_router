@@ -7,11 +7,13 @@ class Node<T> {
   T? value;
   final Map<String, Node<T>> staticChildren = {};
   final List<Node<T>> parametricChildren = [];
+  Node<T>? wildcardChild;
   final Node<T>? parentNode;
 
   Node({
     required this.pathSection,
     this.value,
+    this.wildcardChild,
     this.parentNode,
   });
 
@@ -66,7 +68,10 @@ class Node<T> {
       stringBuffer,
       title: 'parametricChildren',
       children: parametricChildren,
-      shouldAddTrailingComma: false,
+      shouldAddTrailingComma: true,
+    );
+    stringBuffer.write(
+      '"wildcardChild": $wildcardChild, "parentNode": ${parentNode == null ? null : '"${parentNode!.pathSection}"'}',
     );
     stringBuffer.write('}}');
     return stringBuffer.toString();
