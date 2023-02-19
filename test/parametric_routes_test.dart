@@ -5,136 +5,216 @@ void main() {
   group('Parametric Routes test', () {
     final radixRouter = RadixRouter<String>();
 
-    radixRouter
-      ..put(
-        method: HttpMethod.get,
-        path: '/fruits/{name}',
-        value: 'get fruit name',
-      )
-      ..put(
-        method: HttpMethod.get,
-        path: '/fruits/{name}/{quantity}',
-        value: 'get fruit name & quantity',
-      )
-      ..put(
-        method: HttpMethod.post,
-        path: '/fruits/{name}',
-        value: 'post fruit name',
-      )
-      ..put(
-        method: HttpMethod.post,
-        path: '/fruits/{name}/{quantity}',
-        value: 'post fruit name & quantity',
-      );
+    final httpMethods = HttpMethod.values;
 
-    test('Valid Get test', () {
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/apple'),
-        'get fruit name',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/banana'),
-        'get fruit name',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/apple/1234'),
-        'get fruit name & quantity',
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.get, path: '/fruits/pineapple/6789'),
-        'get fruit name & quantity',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/random'),
-        'get fruit name',
-      );
-    });
+    for (final httpMethod in httpMethods) {
+      final httpMethodName = httpMethod.name;
+      radixRouter
+        ..put(
+          method: httpMethod,
+          path: '/{country}',
+          value: '$httpMethodName dynamic country',
+        )
+        ..put(
+          method: httpMethod,
+          path: '/countries/{state}',
+          value: '$httpMethodName dynamic state',
+        )
+        ..put(
+          method: httpMethod,
+          path: '/countries/states/{city}',
+          value: '$httpMethodName dynamic city',
+        )
+        ..put(
+          method: httpMethod,
+          path: '/countries/{state}/{city}',
+          value: '$httpMethodName dynamic state & city',
+        )
+        ..put(
+          method: httpMethod,
+          path: '/{countries}/{state}/{city}',
+          value: '$httpMethodName dynamic country, state & city',
+        );
+    }
 
-    test('Valid Post test', () {
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/apple'),
-        'post fruit name',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/banana'),
-        'post fruit name',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/apple/1234'),
-        'post fruit name & quantity',
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.post, path: '/fruits/pineapple/6789'),
-        'post fruit name & quantity',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/random'),
-        'post fruit name',
-      );
-    });
+    for (final httpMethod in httpMethods) {
+      final httpMethodName = httpMethod.name;
+      test('Valid $httpMethodName test', () {
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/india',
+          ),
+          '$httpMethodName dynamic country',
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/andhra-pradesh',
+          ),
+          '$httpMethodName dynamic state',
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/telangana',
+          ),
+          '$httpMethodName dynamic state',
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/states/kadapa',
+          ),
+          '$httpMethodName dynamic city',
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/states/cuddapah',
+          ),
+          '$httpMethodName dynamic city',
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/andhra-pradesh/kadapa',
+          ),
+          '$httpMethodName dynamic state & city',
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/andhra-pradesh/cuddapah',
+          ),
+          '$httpMethodName dynamic state & city',
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/india/andhra-pradesh/cuddapah',
+          ),
+          '$httpMethodName dynamic country, state & city',
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/india/andhra-pradesh/kadapa',
+          ),
+          '$httpMethodName dynamic country, state & city',
+        );
+      });
+    }
 
-    test('Invalid Get test', () {
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fru-its'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fru/its/ban/ana'),
-        isNull,
-      );
-    });
+    for (final httpMethod in httpMethods) {
+      final httpMethodName = httpMethod.name;
+      test('Invalid $httpMethodName test', () {
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/andhra-pradesh/kadapa/cuddapah',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/andhra-pradesh/cuddapah/kadapa',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/states/kadapa/cuddapah',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/states/cuddapah/kadapa',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/states/city/cuddapah',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/states/city/kadapa',
+          ),
+          isNull,
+        );
+      });
+    }
 
-    test('Invalid Post test', () {
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fru-its'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fru/its/ban/ana'),
-        isNull,
-      );
-    });
-
-    test('Clear Get test', () {
-      radixRouter.clear();
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/apple'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/pineapple'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/banana'),
-        isNull,
-      );
-    });
-
-    test('Clear Post test', () {
-      radixRouter.clear();
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/apple'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/pineapple'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/banana'),
-        isNull,
-      );
-    });
+    for (final httpMethod in httpMethods) {
+      final httpMethodName = httpMethod.name;
+      test('Valid $httpMethodName test', () {
+        radixRouter.clear();
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/andhra-pradesh',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/telangana',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/states/kadapa',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/states/cuddapah',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/andhra-pradesh/kadapa',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/andhra-pradesh/cuddapah',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/india/andhra-pradesh/cuddapah',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/india/andhra-pradesh/kadapa',
+          ),
+          isNull,
+        );
+      });
+    }
   });
 }

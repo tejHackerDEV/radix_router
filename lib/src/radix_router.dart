@@ -18,14 +18,6 @@ class RadixRouter<T> {
 
     final pathSections = path.split('/');
     for (int i = 0; i < pathSections.length; ++i) {
-      if (currentNode.type == NodeType.wildcard) {
-        // if currentNode is wildcard node, then there shouldn't be any other sections
-        // after the path
-        throw AssertionError(
-          'Wildcard should be the last section of the $path',
-        );
-      }
-
       final pathSection = pathSections[i];
       if (pathSection.isEmpty) {
         continue;
@@ -56,6 +48,14 @@ class RadixRouter<T> {
             pathSection: pathSection,
             parentNode: currentNode,
           );
+
+          if (!pathSections.isAtLastIteration(i)) {
+            // if currentNode is wildcard node, then there shouldn't
+            // be any other sections after the path
+            throw AssertionError(
+              'Wildcard should be the last section of the $path',
+            );
+          }
           break;
       }
     }
@@ -133,7 +133,10 @@ class RadixRouter<T> {
               resultNode = currentParametricNode;
             }
 
-            setResultNode();
+            if (resultNode?.value != null) {
+              // only set the resultNode if the value of that node is not null
+              setResultNode();
+            }
           }
         }
 
