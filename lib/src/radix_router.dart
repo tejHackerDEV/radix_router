@@ -71,27 +71,90 @@ class RadixRouter<T> {
       return null;
     }
 
-    final pathSections = path.split('/');
+    try {
+      currentNode = _lookup(
+        pathSections: path.split('/')
+          // remove empty pathSections otherwise their will be issues while lookup
+          ..removeWhere((pathSection) => pathSection.trim().isEmpty),
+        currentNode: currentNode,
+      );
+    } on StateError {
+      currentNode = null;
+    }
+    return currentNode?.value;
+  }
+
+  Node<T>? _lookup({
+    required Iterable<String> pathSections,
+    required Node<T>? currentNode,
+  }) {
+    if (pathSections.isEmpty) {
+      // if empty pathSections passed throw StateError
+      throw StateError("No pathSections");
+    }
+
     for (int i = 0; i < pathSections.length; ++i) {
-      final pathSection = pathSections[i];
+      final pathSection = pathSections.elementAt(i);
       if (pathSection.isEmpty) {
         continue;
       }
       Node<T>? tempCurrentNode = currentNode?.staticChildren[pathSection];
       if (tempCurrentNode == null) {
         // lookup in parametric children
-        tempCurrentNode = currentNode?.parametricChildren.firstWhereOrNull(
-          (parametricChild) => parametricChild.parameterName.isNotEmpty,
-        );
+        Node<T>? nonRegExpResultNode;
+        Node<T>? regExpResultNode;
+        for (int j = 0;
+            j < (currentNode?.parametricChildren.length ?? 0);
+            ++j) {
+          final currentParametricNode = currentNode!.parametricChildren[j];
+          final regExp = currentParametricNode.parameterRegExp;
+
+          // Try to lookup for the reaming path under the currentParametricNode,
+          // if the result found then set it, else discard the currentParametricNode
+          // & keep looking forward
+          final remainingPathSections = pathSections.skip(i + 1);
+          bool doesRegexMatched = regExp?.hasMatch(pathSection) == true;
+          Node<T>? resultNode;
+          void setResultNode() {
+            if (regExp == null) {
+              nonRegExpResultNode = resultNode;
+              return;
+            }
+            regExpResultNode = resultNode;
+          }
+
+          if (regExp == null || doesRegexMatched) {
+            try {
+              resultNode = _lookup(
+                pathSections: remainingPathSections,
+                currentNode: currentParametricNode,
+              );
+            } on StateError {
+              resultNode = currentParametricNode;
+            }
+
+            setResultNode();
+          }
+        }
+
+        // If any parametricNode is set then simply return it without going further.
+        // Also regExpParametricNode has higher precedence
+        // over normalParametricNode which doesn't have any regExp
+        if (regExpResultNode?.value != null) {
+          return regExpResultNode;
+        } else if (nonRegExpResultNode?.value != null) {
+          return nonRegExpResultNode;
+        }
+
         if (tempCurrentNode == null) {
           // lookup in wildcardChild
           if (currentNode?.wildcardChild != null) {
-            return currentNode?.wildcardChild?.value;
+            return currentNode?.wildcardChild;
           }
         }
       }
 
-      if (i == pathSections.length - 1 && tempCurrentNode?.value == null) {
+      if (pathSections.isAtLastIteration(i) && tempCurrentNode?.value == null) {
         // it is last section but value not found,
         // so check if any parentNode's has any wildcardChild by backtracking
         while (true) {
@@ -103,13 +166,14 @@ class RadixRouter<T> {
             currentNode = tempCurrentNode;
             continue;
           }
-          return currentNode?.wildcardChild?.value;
+          return currentNode?.wildcardChild;
         }
       }
 
       currentNode = tempCurrentNode;
     }
-    return currentNode?.value;
+
+    return currentNode;
   }
 
   void clear() {

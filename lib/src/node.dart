@@ -26,6 +26,22 @@ class Node<T> {
     return pathSection.substring(1, pathSection.length - 1);
   }
 
+  RegExp? get parameterRegExp {
+    if (type != NodeType.parametric) {
+      throw AssertionError('$this is not a parametric path');
+    }
+    final index = pathSection.indexOf(':');
+    if (index == -1) {
+      return null;
+    }
+    return RegExp(
+      pathSection.substring(
+        index + 1,
+        pathSection.length - 1,
+      ),
+    );
+  }
+
   StringBuffer _writeChildrenBufferData(
     StringBuffer? stringBuffer, {
     required String title,
@@ -48,7 +64,7 @@ class Node<T> {
       stringBuffer.write(']');
     }
     if (shouldAddTrailingComma) {
-      stringBuffer.write(',');
+      stringBuffer.write(', ');
     }
     return stringBuffer;
   }

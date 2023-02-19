@@ -6,4 +6,6 @@ extension IterableExtension<T> on Iterable<T> {
     if (orElse != null) return orElse();
     return null;
   }
+
+  bool isAtLastIteration(int i) => length - 1 == i;
 }
