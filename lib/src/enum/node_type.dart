@@ -1,0 +1,4 @@
+enum NodeType {
+  static,
+  parametric,
+}

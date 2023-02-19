@@ -1,4 +1,8 @@
+import 'package:radix_router/src/extensions/iterable.dart';
+import 'package:radix_router/src/extensions/string.dart';
+
 import 'enum/http_method.dart';
+import 'enum/node_type.dart';
 import 'node.dart';
 
 class RadixRouter<T> {
@@ -18,8 +22,25 @@ class RadixRouter<T> {
       if (pathSection.isEmpty) {
         continue;
       }
-      currentNode =
-          currentNode.children[pathSection] ??= Node(pathSection: pathSection);
+
+      switch (pathSection.nodeType) {
+        case NodeType.static:
+          currentNode = currentNode.staticChildren[pathSection] ??=
+              Node<T>(pathSection: pathSection);
+          break;
+        case NodeType.parametric:
+          Node<T>? nodeInsertedAlready = currentNode.parametricChildren
+              .firstWhereOrNull((parametricChild) =>
+                  parametricChild.pathSection == pathSection);
+          if (nodeInsertedAlready == null) {
+            // node in not inserted already. So insert new node
+            final nodeToInsert = Node<T>(pathSection: pathSection);
+            currentNode.parametricChildren.add(nodeToInsert);
+            nodeInsertedAlready = nodeToInsert;
+          }
+          currentNode = nodeInsertedAlready;
+          break;
+      }
     }
     if (currentNode.value != null) {
       throw AssertionError('$path is already registered for $method');
@@ -39,10 +60,17 @@ class RadixRouter<T> {
       if (pathSection.isEmpty) {
         continue;
       }
-      currentNode = currentNode?.children[pathSection];
-      if (currentNode == null) {
-        return null;
+      Node<T>? tempCurrentNode = currentNode?.staticChildren[pathSection];
+      if (tempCurrentNode == null) {
+        // lookup in parametric children
+        tempCurrentNode = currentNode?.parametricChildren.firstWhereOrNull(
+          (parametricChild) => parametricChild.parameterName.isNotEmpty,
+        );
+        if (tempCurrentNode == null) {
+          return null;
+        }
       }
+      currentNode = tempCurrentNode;
     }
     return currentNode?.value;
   }
