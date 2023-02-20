@@ -5,334 +5,152 @@ void main() {
   group('Combined Routes test', () {
     final radixRouter = RadixRouter<String>();
 
-    radixRouter
-      ..put(method: HttpMethod.get, path: '/fruit', value: 'get fruit')
-      ..put(method: HttpMethod.get, path: '/fruits', value: 'get fruits')
-      ..put(method: HttpMethod.get, path: '/fruits/apple', value: 'get apple')
-      ..put(
-        method: HttpMethod.get,
-        path: '/fruits/pineapple',
-        value: 'get pineapple',
-      )
-      ..put(method: HttpMethod.get, path: '/fruits/banana', value: 'get banana')
-      ..put(
-        method: HttpMethod.get,
-        path: '/fruits/{name}',
-        value: 'get dynamic fruit name',
-      )
-      ..put(
-        method: HttpMethod.get,
-        path: '/fruits/{name}/{quantity}',
-        value: 'get dynamic fruit name & quantity',
-      )
-      ..put(
-        method: HttpMethod.get,
-        path: '/fruits/apple/1234',
-        value: 'get apple with 1234 quantity',
-      )
-      ..put(
-        method: HttpMethod.get,
-        path: '/fruits/apple/*',
-        value: 'get wildcard apple',
-      )
-      ..put(method: HttpMethod.post, path: '/fruit', value: 'post fruit')
-      ..put(method: HttpMethod.post, path: '/fruits', value: 'post fruits')
-      ..put(method: HttpMethod.post, path: '/fruits/apple', value: 'post apple')
-      ..put(
-        method: HttpMethod.post,
-        path: '/fruits/pineapple',
-        value: 'post pineapple',
-      )
-      ..put(
-        method: HttpMethod.post,
-        path: '/fruits/banana',
-        value: 'post banana',
-      )
-      ..put(
-        method: HttpMethod.post,
-        path: '/fruits/{name}',
-        value: 'post dynamic fruit name',
-      )
-      ..put(
-        method: HttpMethod.post,
-        path: '/fruits/{name}/{quantity}',
-        value: 'post dynamic fruit name & quantity',
-      )
-      ..put(
-        method: HttpMethod.post,
-        path: '/fruits/apple/1234',
-        value: 'post apple with 1234 quantity',
-      )
-      ..put(
-        method: HttpMethod.post,
-        path: '/fruits/apple/*',
-        value: 'post wildcard apple',
-      );
+    final httpMethods = HttpMethod.values;
 
-    test('Valid Get test', () {
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruit'),
-        'get fruit',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits'),
-        'get fruits',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/apple'),
-        'get apple',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/pineapple'),
-        'get pineapple',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/banana'),
-        'get banana',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/strawberry'),
-        'get dynamic fruit name',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/random'),
-        'get dynamic fruit name',
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.get, path: '/fruits/random/random'),
-        'get dynamic fruit name & quantity',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/apple/1234'),
-        'get apple with 1234 quantity',
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.get, path: '/fruits/strawberry/1234'),
-        'get dynamic fruit name & quantity',
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.get, path: '/fruits/apple/random'),
-        'get wildcard apple',
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.get, path: '/fruits/apple/1234/1234'),
-        'get wildcard apple',
-      );
-    });
+    for (final httpMethod in httpMethods) {
+      final httpMethodName = httpMethod.name;
+      radixRouter
+        ..put(
+          method: httpMethod,
+          path: '/*',
+          value: '$httpMethodName wildcard',
+        )
+        ..put(
+          method: httpMethod,
+          path: '/fruits',
+          value: '$httpMethodName fruits',
+        )
+        ..put(
+          method: httpMethod,
+          path: '/countries/india',
+          value: '$httpMethodName india',
+        )
+        ..put(
+          method: httpMethod,
+          path: '/countries/{state}',
+          value: '$httpMethodName dynamic state',
+        )
+        ..put(
+          method: httpMethod,
+          path: '/countries/{state}/*',
+          value: '$httpMethodName dynamic wildcard state',
+        )
+        ..put(
+          method: httpMethod,
+          path: '/countries/{state:\\d+\$}',
+          value: '$httpMethodName dynamic number state',
+        );
+    }
 
-    test('Valid Post test', () {
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruit'),
-        'post fruit',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits'),
-        'post fruits',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/apple'),
-        'post apple',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/pineapple'),
-        'post pineapple',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/banana'),
-        'post banana',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/strawberry'),
-        'post dynamic fruit name',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/random'),
-        'post dynamic fruit name',
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.post, path: '/fruits/random/random'),
-        'post dynamic fruit name & quantity',
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/apple/1234'),
-        'post apple with 1234 quantity',
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.post, path: '/fruits/strawberry/1234'),
-        'post dynamic fruit name & quantity',
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.post, path: '/fruits/apple/random'),
-        'post wildcard apple',
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.post, path: '/fruits/apple/1234/1234'),
-        'post wildcard apple',
-      );
-    });
+    for (final httpMethod in httpMethods) {
+      final httpMethodName = httpMethod.name;
+      test('Valid $httpMethodName test', () {
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries',
+          ),
+          '$httpMethodName wildcard',
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/fruits',
+          ),
+          '$httpMethodName fruits',
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/india',
+          ),
+          '$httpMethodName india',
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/pakistan',
+          ),
+          '$httpMethodName dynamic state',
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/2424',
+          ),
+          '$httpMethodName dynamic number state',
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/2424/random',
+          ),
+          '$httpMethodName wildcard',
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/bangladesh/random',
+          ),
+          '$httpMethodName dynamic wildcard state',
+        );
+      });
+    }
 
-    test('Invalid Get test', () {
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fru-it'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fru-its'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fru/its/ban/ana'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.get, path: '/fruits/pineapple/1234'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.get, path: '/fruits/pineapple/1234/1234'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/banana/1234'),
-        isNull,
-      );
-    });
-
-    test('Invalid Post test', () {
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fru-it'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fru-its'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fru/its/ban/ana'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.post, path: '/fruits/pineapple/1234'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.post, path: '/fruits/banana/1234'),
-        isNull,
-      );
-    });
-
-    test('Clear Get test', () {
-      radixRouter.clear();
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruit'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/apple'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/pineapple'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/banana'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/strawberry'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/random'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.get, path: '/fruits/random/random'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.get, path: '/fruits/apple/1234'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.get, path: '/fruits/apple/random'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.get, path: '/fruits/apple/1234/1234'),
-        isNull,
-      );
-    });
-
-    test('Clear Post test', () {
-      radixRouter.clear();
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruit'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/apple'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/pineapple'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/banana'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/strawberry'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/random'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.post, path: '/fruits/random/random'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(method: HttpMethod.post, path: '/fruits/apple/1234'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.post, path: '/fruits/apple/random'),
-        isNull,
-      );
-      expect(
-        radixRouter.lookup(
-            method: HttpMethod.post, path: '/fruits/apple/1234/1234'),
-        isNull,
-      );
-    });
+    for (final httpMethod in httpMethods) {
+      final httpMethodName = httpMethod.name;
+      test('Valid $httpMethodName test', () {
+        radixRouter.clear();
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/fruits',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/india',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/pakistan',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/2424',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/2424/random',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/bangladesh/random',
+          ),
+          isNull,
+        );
+      });
+    }
   });
 }
