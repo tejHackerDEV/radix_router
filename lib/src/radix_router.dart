@@ -131,23 +131,23 @@ class RadixRouter<T> {
     for (int j = 0;
         j < (currentNode?.regExpParametricChildNodes.length ?? 0);
         ++j) {
-      final tempParametricNode = currentNode!.regExpParametricChildNodes[j];
+      tempNode = currentNode!.regExpParametricChildNodes[j];
       final Map<String, String> parametricPathParameters = {};
       // it is an regExp one, so check regExp matches the pathSection
-      if (!tempParametricNode.parameterRegExp!.hasMatch(pathSection)) {
+      if (!tempNode.parameterRegExp!.hasMatch(pathSection)) {
         // match not found, so skip the iteration
         continue;
       }
-      parametricPathParameters[tempParametricNode.parameterName] = pathSection;
+      parametricPathParameters[tempNode.parameterName] = pathSection;
       if (pathSections.containsOnlyOneElement) {
         // as it contains only one element, simply return it
         // by adding parametricPathParameters to pathParameters
         pathParameters.addAll(parametricPathParameters);
-        return tempParametricNode;
+        return tempNode;
       }
       final resultNode = _lookup(
         pathSections: pathSections.skip(1),
-        currentNode: tempParametricNode,
+        currentNode: tempNode,
         pathParameters: parametricPathParameters,
       );
       // add parametricPathParameters to pathParameters,
