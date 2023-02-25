@@ -134,51 +134,37 @@ class RadixRouter<T> {
         j < (currentNode?.regExpParametricChildNodes.length ?? 0);
         ++j) {
       tempNode = currentNode!.regExpParametricChildNodes[j];
-      final Map<String, String> parametricPathParameters = {};
       // it is an regExp one, so check regExp matches the pathSection
       if (!tempNode.parameterRegExp!.hasMatch(pathSection)) {
         // match not found, so skip the iteration
         continue;
       }
-      parametricPathParameters[tempNode.parameterName] = pathSection;
+      pathParameters[tempNode.parameterName] = pathSection;
       if (pathSections.containsOnlyOneElement) {
         // as it contains only one element, simply return it
-        // by adding parametricPathParameters to pathParameters
-        pathParameters.addAll(parametricPathParameters);
         return tempNode;
       }
-      final resultNode = _lookup(
+      return _lookup(
         pathSections: pathSections.skip(1),
         currentNode: tempNode,
-        pathParameters: parametricPathParameters,
+        pathParameters: pathParameters,
       );
-      // add parametricPathParameters to pathParameters,
-      // so that the final pathParameters will contain all combinations
-      pathParameters.addAll(parametricPathParameters);
-      return resultNode;
     }
 
     // notFound in regExpParametricChildNodes, so look in nonExpParametricChild
     tempNode = currentNode?.nonRegExpParametricChild;
     if (tempNode != null) {
-      final Map<String, String> parametricPathParameters = {};
       // it is an non-regex, so don't check anything
-      parametricPathParameters[tempNode.parameterName] = pathSection;
+      pathParameters[tempNode.parameterName] = pathSection;
       if (pathSections.containsOnlyOneElement) {
         // as it contains only one element, simply return it
-        // by adding parametricPathParameters to pathParameters
-        pathParameters.addAll(parametricPathParameters);
         return tempNode;
       }
-      final resultNode = _lookup(
+      return _lookup(
         pathSections: pathSections.skip(1),
         currentNode: tempNode,
-        pathParameters: parametricPathParameters,
+        pathParameters: pathParameters,
       );
-      // add parametricPathParameters to pathParameters,
-      // so that the final pathParameters will contain all combinations
-      pathParameters.addAll(parametricPathParameters);
-      return resultNode;
     }
 
     // route not found in parametricNodes so check for wildcardNode
