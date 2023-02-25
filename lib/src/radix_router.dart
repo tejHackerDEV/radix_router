@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:radix_router/src/extensions/iterable.dart';
 import 'package:radix_router/src/extensions/string.dart';
 
@@ -18,13 +20,9 @@ class RadixRouter<T> {
     _trees[method] ??= Node(pathSection: '/');
     Node<T> currentNode = _trees[method]!;
 
-    final pathSections = path.split('/');
+    final pathSections = path.decodePath.sections;
     for (int i = 0; i < pathSections.length; ++i) {
       final pathSection = pathSections[i];
-      if (pathSection.isEmpty) {
-        continue;
-      }
-
       switch (pathSection.nodeType) {
         case NodeType.static:
           currentNode = currentNode.staticChildNodes[pathSection] ??= Node<T>(
@@ -85,10 +83,9 @@ class RadixRouter<T> {
     }
 
     final Map<String, String> pathParameters = {};
+    final decodedPath = path.decodePath;
     currentNode = _lookup(
-      pathSections: path.split('/')
-        // remove empty pathSections otherwise their will be issues while lookup
-        ..removeWhere((pathSection) => pathSection.trim().isEmpty),
+      pathSections: decodedPath.sections,
       currentNode: currentNode,
       pathParameters: pathParameters,
     );
@@ -97,7 +94,12 @@ class RadixRouter<T> {
     if (value == null) {
       return null;
     }
-    return Result(value: value, pathParameters: pathParameters);
+    return Result(
+      value: value,
+      pathParameters: pathParameters,
+      queryParameters:
+          decodedPath.queryString?.extractQueryParameters(encoding: utf8) ?? {},
+    );
   }
 
   Node<T>? _lookup({

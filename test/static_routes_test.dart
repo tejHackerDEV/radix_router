@@ -58,6 +58,7 @@ void main() {
           '$httpMethodName countries',
         );
         expect(result?.pathParameters.isEmpty, isTrue);
+        expect(result?.queryParameters, isEmpty);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -68,6 +69,7 @@ void main() {
           '$httpMethodName india',
         );
         expect(result?.pathParameters.isEmpty, isTrue);
+        expect(result?.queryParameters, isEmpty);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -78,6 +80,7 @@ void main() {
           '$httpMethodName pakistan',
         );
         expect(result?.pathParameters.isEmpty, isTrue);
+        expect(result?.queryParameters, isEmpty);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -88,6 +91,7 @@ void main() {
           '$httpMethodName states',
         );
         expect(result?.pathParameters.isEmpty, isTrue);
+        expect(result?.queryParameters, isEmpty);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -98,6 +102,7 @@ void main() {
           '$httpMethodName andhra-pradesh',
         );
         expect(result?.pathParameters.isEmpty, isTrue);
+        expect(result?.queryParameters, isEmpty);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -108,6 +113,7 @@ void main() {
           '$httpMethodName apple',
         );
         expect(result?.pathParameters.isEmpty, isTrue);
+        expect(result?.queryParameters, isEmpty);
       });
     }
 
