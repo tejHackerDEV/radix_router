@@ -184,7 +184,9 @@ class RadixRouter<T> {
     Node<T>? tempWildcardNode = tempNode?.wildcardChild;
     do {
       if (tempWildcardNode != null) {
-        // wildcardNode found so simply return it
+        // wildcardNode found so update the pathParameters
+        // with the remaining pathSections & return it.
+        pathParameters['*'] = pathSections.join('/');
         return tempWildcardNode;
       }
       tempNode = tempNode?.parentNode;

@@ -96,7 +96,8 @@ void main() {
           '$httpMethodName dynamic wildcard state',
         );
         expect(result?.pathParameters['country'], 'bangladesh');
-        expect(result?.pathParameters.length, 1);
+        expect(result?.pathParameters['*'], 'random');
+        expect(result?.pathParameters.length, 2);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -107,7 +108,8 @@ void main() {
           '$httpMethodName wildcard',
         );
         expect(result?.pathParameters['country'], '2424');
-        expect(result?.pathParameters.length, 1);
+        expect(result?.pathParameters['*'], 'random');
+        expect(result?.pathParameters.length, 2);
       });
     }
 

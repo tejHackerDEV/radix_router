@@ -47,7 +47,8 @@ void main() {
           result?.value,
           '$httpMethodName wildcard state',
         );
-        expect(result?.pathParameters, isEmpty);
+        expect(result?.pathParameters['*'], 'telangana');
+        expect(result?.pathParameters.length, 1);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -57,7 +58,8 @@ void main() {
           result?.value,
           '$httpMethodName wildcard state',
         );
-        expect(result?.pathParameters, isEmpty);
+        expect(result?.pathParameters['*'], '2424');
+        expect(result?.pathParameters.length, 1);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -67,7 +69,8 @@ void main() {
           result?.value,
           '$httpMethodName wildcard city',
         );
-        expect(result?.pathParameters, isEmpty);
+        expect(result?.pathParameters['*'], 'cuddapah');
+        expect(result?.pathParameters.length, 1);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -77,7 +80,8 @@ void main() {
           result?.value,
           '$httpMethodName wildcard street',
         );
-        expect(result?.pathParameters, isEmpty);
+        expect(result?.pathParameters['*'], 'bhagya-nagar-colony');
+        expect(result?.pathParameters.length, 1);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -87,7 +91,8 @@ void main() {
           result?.value,
           '$httpMethodName wildcard street',
         );
-        expect(result?.pathParameters, isEmpty);
+        expect(result?.pathParameters['*'], 'ngo-colony');
+        expect(result?.pathParameters.length, 1);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -97,7 +102,8 @@ void main() {
           result?.value,
           '$httpMethodName wildcard fruit',
         );
-        expect(result?.pathParameters, isEmpty);
+        expect(result?.pathParameters['*'], 'apple');
+        expect(result?.pathParameters.length, 1);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -107,7 +113,8 @@ void main() {
           result?.value,
           '$httpMethodName wildcard fruit',
         );
-        expect(result?.pathParameters, isEmpty);
+        expect(result?.pathParameters['*'], 'apple/1234');
+        expect(result?.pathParameters.length, 1);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -117,7 +124,8 @@ void main() {
           result?.value,
           '$httpMethodName wildcard',
         );
-        expect(result?.pathParameters, isEmpty);
+        expect(result?.pathParameters['*'], 'random');
+        expect(result?.pathParameters.length, 1);
       });
     }
 
