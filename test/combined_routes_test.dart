@@ -27,19 +27,88 @@ void main() {
         )
         ..put(
           method: httpMethod,
-          path: '/countries/{state}',
-          value: '$httpMethodName dynamic state',
+          path: '/countries/{country}',
+          value: '$httpMethodName dynamic country',
         )
         ..put(
           method: httpMethod,
-          path: '/countries/{state}/*',
+          path: '/countries/{country}/*',
           value: '$httpMethodName dynamic wildcard state',
         )
         ..put(
           method: httpMethod,
-          path: '/countries/{state:\\d+\$}',
-          value: '$httpMethodName dynamic number state',
+          path: '/countries/{country:\\d+\$}',
+          value: '$httpMethodName dynamic number country',
         );
+    }
+
+    for (final httpMethod in httpMethods) {
+      final httpMethodName = httpMethod.name;
+      test('Valid $httpMethodName test', () {
+        Result<String>? result = radixRouter.lookup(
+          method: httpMethod,
+          path: '/fruits',
+        );
+        expect(
+          result?.value,
+          '$httpMethodName fruits',
+        );
+        expect(result?.pathParameters, isEmpty);
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: '/countries/india',
+        );
+        expect(
+          result?.value,
+          '$httpMethodName india',
+        );
+        expect(result?.pathParameters, isEmpty);
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: '/countries/pakistan',
+        );
+        expect(
+          result?.value,
+          '$httpMethodName dynamic country',
+        );
+        expect(result?.pathParameters['country'], 'pakistan');
+        expect(result?.pathParameters.length, 1);
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: '/countries/2424',
+        );
+        expect(
+          result?.value,
+          '$httpMethodName dynamic number country',
+        );
+        expect(result?.pathParameters['country'], '2424');
+        expect(result?.pathParameters.length, 1);
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: '/countries/bangladesh/random',
+        );
+        expect(
+          result?.value,
+          '$httpMethodName dynamic wildcard state',
+        );
+        expect(result?.pathParameters['country'], 'bangladesh');
+        expect(result?.pathParameters.length, 1);
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: '/countries/2424/random',
+        );
+        expect(
+          result?.value,
+          '$httpMethodName wildcard',
+        );
+        expect(result?.pathParameters['country'], '2424');
+        expect(result?.pathParameters.length, 1);
+      });
     }
 
     for (final httpMethod in httpMethods) {
@@ -50,56 +119,14 @@ void main() {
             method: httpMethod,
             path: '/countries',
           ),
-          '$httpMethodName wildcard',
-        );
-        expect(
-          radixRouter.lookup(
-            method: httpMethod,
-            path: '/fruits',
-          ),
-          '$httpMethodName fruits',
-        );
-        expect(
-          radixRouter.lookup(
-            method: httpMethod,
-            path: '/countries/india',
-          ),
-          '$httpMethodName india',
-        );
-        expect(
-          radixRouter.lookup(
-            method: httpMethod,
-            path: '/countries/pakistan',
-          ),
-          '$httpMethodName dynamic state',
-        );
-        expect(
-          radixRouter.lookup(
-            method: httpMethod,
-            path: '/countries/2424',
-          ),
-          '$httpMethodName dynamic number state',
-        );
-        expect(
-          radixRouter.lookup(
-            method: httpMethod,
-            path: '/countries/2424/random',
-          ),
-          '$httpMethodName wildcard',
-        );
-        expect(
-          radixRouter.lookup(
-            method: httpMethod,
-            path: '/countries/bangladesh/random',
-          ),
-          '$httpMethodName dynamic wildcard state',
+          isNull,
         );
       });
     }
 
     for (final httpMethod in httpMethods) {
       final httpMethodName = httpMethod.name;
-      test('Valid $httpMethodName test', () {
+      test('Clear $httpMethodName test', () {
         radixRouter.clear();
         expect(
           radixRouter.lookup(

@@ -7,5 +7,7 @@ extension IterableExtension<T> on Iterable<T> {
     return null;
   }
 
-  bool isAtLastIteration(int i) => length - 1 == i;
+  bool get containsOnlyOneElement => length == 1;
+
+  bool isLastIteration(int i) => length - 1 == i;
 }

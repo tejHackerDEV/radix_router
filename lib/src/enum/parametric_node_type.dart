@@ -1,0 +1,4 @@
+enum ParametricNodeType {
+  regExp,
+  nonRegExp,
+}

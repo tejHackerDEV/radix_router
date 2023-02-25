@@ -3,7 +3,9 @@ import 'package:radix_router/src/extensions/string.dart';
 
 import 'enum/http_method.dart';
 import 'enum/node_type.dart';
+import 'enum/parametric_node_type.dart';
 import 'node.dart';
+import 'result.dart';
 
 class RadixRouter<T> {
   final Map<HttpMethod, Node<T>> _trees = {};
@@ -25,23 +27,34 @@ class RadixRouter<T> {
 
       switch (pathSection.nodeType) {
         case NodeType.static:
-          currentNode = currentNode.staticChildren[pathSection] ??= Node<T>(
+          currentNode = currentNode.staticChildNodes[pathSection] ??= Node<T>(
             pathSection: pathSection,
             parentNode: currentNode,
           );
           break;
         case NodeType.parametric:
-          Node<T>? nodeInsertedAlready = currentNode.parametricChildren
-              .firstWhereOrNull((parametricChild) =>
-                  parametricChild.pathSection == pathSection);
-          if (nodeInsertedAlready == null) {
-            // node in not inserted already. So insert new node
-            final nodeToInsert =
-                Node<T>(pathSection: pathSection, parentNode: currentNode);
-            currentNode.parametricChildren.add(nodeToInsert);
-            nodeInsertedAlready = nodeToInsert;
+          switch (pathSection.parametricNodeType) {
+            case ParametricNodeType.regExp:
+              Node<T>? nodeInsertedAlready = currentNode
+                  .regExpParametricChildNodes
+                  .firstWhereOrNull((parametricChild) =>
+                      parametricChild.pathSection == pathSection);
+              if (nodeInsertedAlready == null) {
+                // node in not inserted already. So insert new node
+                final nodeToInsert =
+                    Node<T>(pathSection: pathSection, parentNode: currentNode);
+                currentNode.regExpParametricChildNodes.add(nodeToInsert);
+                nodeInsertedAlready = nodeToInsert;
+              }
+              currentNode = nodeInsertedAlready;
+              break;
+            case ParametricNodeType.nonRegExp:
+              currentNode = currentNode.nonRegExpParametricChild ??= Node<T>(
+                pathSection: pathSection,
+                parentNode: currentNode,
+              );
+              break;
           }
-          currentNode = nodeInsertedAlready;
           break;
         case NodeType.wildcard:
           currentNode = currentNode.wildcardChild ??= Node<T>(
@@ -49,7 +62,7 @@ class RadixRouter<T> {
             parentNode: currentNode,
           );
 
-          if (!pathSections.isAtLastIteration(i)) {
+          if (!pathSections.isLastIteration(i)) {
             // if currentNode is wildcard node, then there shouldn't
             // be any other sections after the path
             throw AssertionError(
@@ -65,118 +78,119 @@ class RadixRouter<T> {
     currentNode.value = value;
   }
 
-  T? lookup({required HttpMethod method, required String path}) {
+  Result<T>? lookup({required HttpMethod method, required String path}) {
     Node<T>? currentNode = _trees[method];
     if (currentNode == null) {
       return null;
     }
 
-    try {
-      currentNode = _lookup(
-        pathSections: path.split('/')
-          // remove empty pathSections otherwise their will be issues while lookup
-          ..removeWhere((pathSection) => pathSection.trim().isEmpty),
-        currentNode: currentNode,
-      );
-    } on StateError {
-      currentNode = null;
+    final Map<String, String> pathParameters = {};
+    currentNode = _lookup(
+      pathSections: path.split('/')
+        // remove empty pathSections otherwise their will be issues while lookup
+        ..removeWhere((pathSection) => pathSection.trim().isEmpty),
+      currentNode: currentNode,
+      pathParameters: pathParameters,
+    );
+
+    final value = currentNode?.value;
+    if (value == null) {
+      return null;
     }
-    return currentNode?.value;
+    return Result(value: value, pathParameters: pathParameters);
   }
 
   Node<T>? _lookup({
     required Iterable<String> pathSections,
     required Node<T>? currentNode,
+    required Map<String, String> pathParameters,
   }) {
     if (pathSections.isEmpty) {
       // if empty pathSections passed throw StateError
       throw StateError("No pathSections");
     }
 
-    for (int i = 0; i < pathSections.length; ++i) {
-      final pathSection = pathSections.elementAt(i);
-      if (pathSection.isEmpty) {
-        continue;
+    final pathSection = pathSections.first;
+    Node<T>? tempNode = currentNode?.staticChildNodes[pathSection];
+    if (tempNode != null) {
+      if (pathSections.containsOnlyOneElement) {
+        // as it contains only one element, simply return it
+        return tempNode;
       }
-      Node<T>? tempCurrentNode = currentNode?.staticChildren[pathSection];
-      if (tempCurrentNode == null) {
-        // lookup in parametric children
-        Node<T>? nonRegExpResultNode;
-        Node<T>? regExpResultNode;
-        for (int j = 0;
-            j < (currentNode?.parametricChildren.length ?? 0);
-            ++j) {
-          final currentParametricNode = currentNode!.parametricChildren[j];
-          final regExp = currentParametricNode.parameterRegExp;
-
-          // Try to lookup for the reaming path under the currentParametricNode,
-          // if the result found then set it, else discard the currentParametricNode
-          // & keep looking forward
-          final remainingPathSections = pathSections.skip(i + 1);
-          bool doesRegexMatched = regExp?.hasMatch(pathSection) == true;
-          Node<T>? resultNode;
-          void setResultNode() {
-            if (regExp == null) {
-              nonRegExpResultNode = resultNode;
-              return;
-            }
-            regExpResultNode = resultNode;
-          }
-
-          if (regExp == null || doesRegexMatched) {
-            try {
-              resultNode = _lookup(
-                pathSections: remainingPathSections,
-                currentNode: currentParametricNode,
-              );
-            } on StateError {
-              resultNode = currentParametricNode;
-            }
-
-            if (resultNode?.value != null) {
-              // only set the resultNode if the value of that node is not null
-              setResultNode();
-            }
-          }
-        }
-
-        // If any parametricNode is set then simply return it without going further.
-        // Also regExpParametricNode has higher precedence
-        // over normalParametricNode which doesn't have any regExp
-        if (regExpResultNode?.value != null) {
-          return regExpResultNode;
-        } else if (nonRegExpResultNode?.value != null) {
-          return nonRegExpResultNode;
-        }
-
-        if (tempCurrentNode == null) {
-          // lookup in wildcardChild
-          if (currentNode?.wildcardChild != null) {
-            return currentNode?.wildcardChild;
-          }
-        }
-      }
-
-      if (pathSections.isAtLastIteration(i) && tempCurrentNode?.value == null) {
-        // it is last section but value not found,
-        // so check if any parentNode's has any wildcardChild by backtracking
-        while (true) {
-          if (currentNode?.wildcardChild == null) {
-            tempCurrentNode = currentNode?.parentNode;
-            if (tempCurrentNode == null) {
-              return null;
-            }
-            currentNode = tempCurrentNode;
-            continue;
-          }
-          return currentNode?.wildcardChild;
-        }
-      }
-
-      currentNode = tempCurrentNode;
+      // still some pathSections are remaining so keep looking forward
+      // with the found Node
+      return _lookup(
+        pathSections: pathSections.skip(1),
+        currentNode: tempNode,
+        pathParameters: pathParameters,
+      );
     }
 
-    return currentNode;
+    // not found in static route, so look in parametricChildNodes
+    // at first look in regExpParametricChildNodes
+    for (int j = 0;
+        j < (currentNode?.regExpParametricChildNodes.length ?? 0);
+        ++j) {
+      final tempParametricNode = currentNode!.regExpParametricChildNodes[j];
+      final Map<String, String> parametricPathParameters = {};
+      // it is an regExp one, so check regExp matches the pathSection
+      if (!tempParametricNode.parameterRegExp!.hasMatch(pathSection)) {
+        // match not found, so skip the iteration
+        continue;
+      }
+      parametricPathParameters[tempParametricNode.parameterName] = pathSection;
+      if (pathSections.containsOnlyOneElement) {
+        // as it contains only one element, simply return it
+        // by adding parametricPathParameters to pathParameters
+        pathParameters.addAll(parametricPathParameters);
+        return tempParametricNode;
+      }
+      final resultNode = _lookup(
+        pathSections: pathSections.skip(1),
+        currentNode: tempParametricNode,
+        pathParameters: parametricPathParameters,
+      );
+      // add parametricPathParameters to pathParameters,
+      // so that the final pathParameters will contain all combinations
+      pathParameters.addAll(parametricPathParameters);
+      return resultNode;
+    }
+
+    // notFound in regExpParametricChildNodes, so look in nonExpParametricChild
+    tempNode = currentNode?.nonRegExpParametricChild;
+    if (tempNode != null) {
+      final Map<String, String> parametricPathParameters = {};
+      // it is an non-regex, so don't check anything
+      parametricPathParameters[tempNode.parameterName] = pathSection;
+      if (pathSections.containsOnlyOneElement) {
+        // as it contains only one element, simply return it
+        // by adding parametricPathParameters to pathParameters
+        pathParameters.addAll(parametricPathParameters);
+        return tempNode;
+      }
+      final resultNode = _lookup(
+        pathSections: pathSections.skip(1),
+        currentNode: tempNode,
+        pathParameters: parametricPathParameters,
+      );
+      // add parametricPathParameters to pathParameters,
+      // so that the final pathParameters will contain all combinations
+      pathParameters.addAll(parametricPathParameters);
+      return resultNode;
+    }
+
+    // route not found in parametricNodes so check for wildcardNode
+    tempNode = currentNode;
+    Node<T>? tempWildcardNode = tempNode?.wildcardChild;
+    do {
+      if (tempWildcardNode != null) {
+        // wildcardNode found so simply return it
+        return tempWildcardNode;
+      }
+      tempNode = tempNode?.parentNode;
+      tempWildcardNode = tempNode?.wildcardChild;
+    } while (tempNode != null);
+    return null;
   }
 
   void clear() {

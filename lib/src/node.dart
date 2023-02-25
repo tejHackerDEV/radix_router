@@ -1,29 +1,43 @@
 import 'package:radix_router/src/extensions/string.dart';
 
 import 'enum/node_type.dart';
+import 'enum/parametric_node_type.dart';
 
 class Node<T> {
   final String pathSection;
   T? value;
-  final Map<String, Node<T>> staticChildren = {};
-  final List<Node<T>> parametricChildren = [];
+  final Map<String, Node<T>> staticChildNodes = {};
+  final List<Node<T>> regExpParametricChildNodes = [];
+  Node<T>? nonRegExpParametricChild;
   Node<T>? wildcardChild;
   final Node<T>? parentNode;
 
   Node({
     required this.pathSection,
     this.value,
+    this.nonRegExpParametricChild,
     this.wildcardChild,
     this.parentNode,
   });
 
   NodeType get type => pathSection.nodeType;
 
+  ParametricNodeType get parametricType {
+    if (parameterRegExp == null) {
+      return ParametricNodeType.nonRegExp;
+    }
+    return ParametricNodeType.regExp;
+  }
+
   String get parameterName {
     if (type != NodeType.parametric) {
       throw AssertionError('$this is not a parametric path');
     }
-    return pathSection.substring(1, pathSection.length - 1);
+    final index = pathSection.indexOf(':');
+    return pathSection.substring(
+      1,
+      index == -1 ? pathSection.length - 1 : index,
+    );
   }
 
   RegExp? get parameterRegExp {
@@ -42,22 +56,22 @@ class Node<T> {
     );
   }
 
-  StringBuffer _writeChildrenBufferData(
+  StringBuffer _writeChildNodesBufferData(
     StringBuffer? stringBuffer, {
     required String title,
-    required Iterable<Node<T>> children,
+    required Iterable<Node<T>> childNodes,
     required bool shouldAddTrailingComma,
   }) {
     stringBuffer ??= StringBuffer();
     stringBuffer.write('"$title": ');
-    if (children.isEmpty) {
+    if (childNodes.isEmpty) {
       stringBuffer.write(null);
     } else {
       stringBuffer.write('[');
-      for (int i = 0; i < children.length; ++i) {
-        final childNode = children.elementAt(i);
+      for (int i = 0; i < childNodes.length; ++i) {
+        final childNode = childNodes.elementAt(i);
         stringBuffer.write(childNode);
-        if (i != children.length - 1) {
+        if (i != childNodes.length - 1) {
           stringBuffer.write(', ');
         }
       }
@@ -74,22 +88,21 @@ class Node<T> {
     StringBuffer stringBuffer = StringBuffer();
     stringBuffer.write('{"$pathSection": {');
     stringBuffer.write('"value": ${value is! num ? '"$value"' : value}, ');
-    _writeChildrenBufferData(
+    _writeChildNodesBufferData(
       stringBuffer,
-      title: 'staticChildren',
-      children: staticChildren.values,
+      title: 'staticChildNodes',
+      childNodes: staticChildNodes.values,
       shouldAddTrailingComma: true,
     );
-    _writeChildrenBufferData(
+    _writeChildNodesBufferData(
       stringBuffer,
-      title: 'parametricChildren',
-      children: parametricChildren,
+      title: 'regExpParametricChildNodes',
+      childNodes: regExpParametricChildNodes,
       shouldAddTrailingComma: true,
     );
     stringBuffer.write(
-      '"wildcardChild": $wildcardChild, "parentNode": ${parentNode == null ? null : '"${parentNode!.pathSection}"'}',
+      '"nonRegExpParametricChild": $nonRegExpParametricChild, "wildcardChild": $wildcardChild, "parentNode": ${parentNode == null ? null : '"${parentNode!.pathSection}"}}'}',
     );
-    stringBuffer.write('}}');
     return stringBuffer.toString();
   }
 }

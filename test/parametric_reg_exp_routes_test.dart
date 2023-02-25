@@ -44,48 +44,77 @@ void main() {
     for (final httpMethod in httpMethods) {
       final httpMethodName = httpMethod.name;
       test('Valid $httpMethodName test', () {
+        Result<String>? result = radixRouter.lookup(
+          method: httpMethod,
+          path: 'india',
+        );
         expect(
-          radixRouter.lookup(
-            method: httpMethod,
-            path: 'india',
-          ),
+          result?.value,
           '$httpMethod small country',
         );
+        expect(result?.pathParameters['country'], 'india');
+        expect(result?.pathParameters.length, 1);
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: 'INDIA',
+        );
         expect(
-          radixRouter.lookup(
-            method: httpMethod,
-            path: 'INDIA',
-          ),
+          result?.value,
           '$httpMethod capital country',
         );
+        expect(result?.pathParameters['country'], 'INDIA');
+        expect(result?.pathParameters.length, 1);
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: 'india/andhra-pradesh',
+        );
         expect(
-          radixRouter.lookup(
-            method: httpMethod,
-            path: 'india/andhra-pradesh',
-          ),
+          result?.value,
           '$httpMethod small country & state',
         );
+        expect(result?.pathParameters['country'], 'india');
+        expect(result?.pathParameters['state'], 'andhra-pradesh');
+        expect(result?.pathParameters.length, 2);
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: 'INDIA/ANDHRA-PRADESH',
+        );
         expect(
-          radixRouter.lookup(
-            method: httpMethod,
-            path: 'INDIA/ANDHRA-PRADESH',
-          ),
+          result?.value,
           '$httpMethod capital country & state',
         );
+        expect(result?.pathParameters['country'], 'INDIA');
+        expect(result?.pathParameters['state'], 'ANDHRA-PRADESH');
+        expect(result?.pathParameters.length, 2);
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: 'india/andhra-pradesh/kadapa',
+        );
         expect(
-          radixRouter.lookup(
-            method: httpMethod,
-            path: 'india/andhra-pradesh/cuddapah',
-          ),
+          result?.value,
           '$httpMethod small country, state & city',
         );
+        expect(result?.pathParameters['country'], 'india');
+        expect(result?.pathParameters['state'], 'andhra-pradesh');
+        expect(result?.pathParameters['city'], 'kadapa');
+        expect(result?.pathParameters.length, 3);
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: 'INDIA/ANDHRA-PRADESH/KADAPA',
+        );
         expect(
-          radixRouter.lookup(
-            method: httpMethod,
-            path: 'INDIA/ANDHRA-PRADESH/CUDDAPAH',
-          ),
+          result?.value,
           '$httpMethod capital country, state & city',
         );
+        expect(result?.pathParameters['country'], 'INDIA');
+        expect(result?.pathParameters['state'], 'ANDHRA-PRADESH');
+        expect(result?.pathParameters['city'], 'KADAPA');
+        expect(result?.pathParameters.length, 3);
       });
     }
 
@@ -172,14 +201,14 @@ void main() {
         expect(
           radixRouter.lookup(
             method: httpMethod,
-            path: 'india/andhra-pradesh/cuddapah',
+            path: 'india/andhra-pradesh/kadapa',
           ),
           isNull,
         );
         expect(
           radixRouter.lookup(
             method: httpMethod,
-            path: 'INDIA/ANDHRA-PRADESH/CUDDAPAH',
+            path: 'INDIA/ANDHRA-PRADESH/KADAPA',
           ),
           isNull,
         );
