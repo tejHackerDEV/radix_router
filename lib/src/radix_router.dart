@@ -52,6 +52,17 @@ class RadixRouter<T> {
               currentNode = nodeInsertedAlready;
               break;
             case ParametricNodeType.nonRegExp:
+              if (currentNode.nonRegExpParametricChild != null) {
+                final pathSectionAlreadyPresent =
+                    currentNode.nonRegExpParametricChild!.pathSection;
+                if (pathSection != pathSectionAlreadyPresent) {
+                  // pathSection that we want to insert is not equal to the
+                  // pathSectionAlreadyPresent, so throw an error
+                  throw AssertionError(
+                    'Invalid pathSection detected. Found $pathSection instead of $pathSectionAlreadyPresent. This will happen if any route is already registered & startsWith ${pathSections.take(i).join('/')}/$pathSectionAlreadyPresent',
+                  );
+                }
+              }
               currentNode = currentNode.nonRegExpParametricChild ??= Node<T>(
                 pathSection: pathSection,
                 middlewares: middlewares,
