@@ -120,7 +120,7 @@ class Node<T, S> {
       shouldAddTrailingComma: true,
     );
     stringBuffer.write(
-      '"nonRegExpParametricChild": $nonRegExpParametricChild, "wildcardNode": $wildcardNode',
+      '"nonRegExpParametricChild": $nonRegExpParametricChild, "wildcardNode": $wildcardNode}}',
     );
     return stringBuffer.toString();
   }
