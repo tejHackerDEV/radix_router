@@ -1,4 +1,0 @@
-enum HttpMethod {
-  get,
-  post,
-}

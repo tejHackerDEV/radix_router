@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:radix_router/src/extensions/iterable.dart';
 import 'package:radix_router/src/extensions/string.dart';
+import 'package:samba_helpers/samba_helpers.dart';
 
-import 'enum/http_method.dart';
 import 'enum/node_type.dart';
 import 'enum/parametric_node_type.dart';
 import 'node.dart';
@@ -35,10 +35,10 @@ class RadixRouter<T, S> {
         case NodeType.parametric:
           switch (pathSection.parametricNodeType) {
             case ParametricNodeType.regExp:
-              Node<T, S>? nodeInsertedAlready = currentNode
-                  .regExpParametricChildNodes
-                  .firstWhereOrNull((parametricChild) =>
-                      parametricChild.pathSection == pathSection);
+              Node<T, S>? nodeInsertedAlready =
+                  currentNode.regExpParametricChildNodes.firstWhereOrNull(
+                (parametricChild) => parametricChild.pathSection == pathSection,
+              );
               if (nodeInsertedAlready == null) {
                 // node in not inserted already. So insert new node
                 final nodeToInsert = Node<T, S>(

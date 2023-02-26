@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:radix_router/src/extensions/map.dart';
+import 'package:samba_helpers/samba_helpers.dart';
 
 import '../decoded_path.dart';
 import '../enum/node_type.dart';
