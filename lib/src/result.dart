@@ -1,8 +1,8 @@
-class Result<T> {
+class Result<T, S> {
   final T value;
   final Map<String, String> pathParameters;
   final Map<String, dynamic> queryParameters;
-  final Iterable<T>? middlewares;
+  final Iterable<S>? middlewares;
 
   Result({
     required this.value,

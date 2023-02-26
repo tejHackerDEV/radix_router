@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('QueryParameters Routes test', () {
-    final radixRouter = RadixRouter<String>();
+    final radixRouter = RadixRouter<String, String>();
 
     final httpMethods = HttpMethod.values;
     for (final httpMethod in httpMethods) {
@@ -18,7 +18,7 @@ void main() {
     for (final httpMethod in httpMethods) {
       final httpMethodName = httpMethod.name;
       test('Valid $httpMethodName test', () {
-        Result<String>? result = radixRouter.lookup(
+        Result<String, String>? result = radixRouter.lookup(
           method: httpMethod,
           path: '/countries?country=india',
         );

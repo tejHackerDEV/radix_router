@@ -9,24 +9,25 @@ import 'enum/parametric_node_type.dart';
 import 'node.dart';
 import 'result.dart';
 
-class RadixRouter<T> {
-  final Map<HttpMethod, Node<T>> _trees = {};
+class RadixRouter<T, S> {
+  final Map<HttpMethod, Node<T, S>> _trees = {};
 
   void put({
     required HttpMethod method,
     required String path,
     required T value,
-    Iterable<T>? middlewares,
+    Iterable<S>? middlewares,
   }) {
-    _trees[method] ??= Node(pathSection: '/');
-    Node<T> currentNode = _trees[method]!;
+    _trees[method] ??= Node<T, S>(pathSection: '/');
+    Node<T, S> currentNode = _trees[method]!;
 
     final pathSections = path.decodePath.sections;
     for (int i = 0; i < pathSections.length; ++i) {
       final pathSection = pathSections[i];
       switch (pathSection.nodeType) {
         case NodeType.static:
-          currentNode = currentNode.staticChildNodes[pathSection] ??= Node<T>(
+          currentNode =
+              currentNode.staticChildNodes[pathSection] ??= Node<T, S>(
             pathSection: pathSection,
             middlewares: middlewares,
           );
@@ -34,13 +35,13 @@ class RadixRouter<T> {
         case NodeType.parametric:
           switch (pathSection.parametricNodeType) {
             case ParametricNodeType.regExp:
-              Node<T>? nodeInsertedAlready = currentNode
+              Node<T, S>? nodeInsertedAlready = currentNode
                   .regExpParametricChildNodes
                   .firstWhereOrNull((parametricChild) =>
                       parametricChild.pathSection == pathSection);
               if (nodeInsertedAlready == null) {
                 // node in not inserted already. So insert new node
-                final nodeToInsert = Node<T>(
+                final nodeToInsert = Node<T, S>(
                   pathSection: pathSection,
                   middlewares: middlewares,
                 );
@@ -61,7 +62,7 @@ class RadixRouter<T> {
                   );
                 }
               }
-              currentNode = currentNode.nonRegExpParametricChild ??= Node<T>(
+              currentNode = currentNode.nonRegExpParametricChild ??= Node<T, S>(
                 pathSection: pathSection,
                 middlewares: middlewares,
               );
@@ -69,7 +70,7 @@ class RadixRouter<T> {
           }
           break;
         case NodeType.wildcard:
-          currentNode = currentNode.wildcardNode ??= Node<T>(
+          currentNode = currentNode.wildcardNode ??= Node<T, S>(
             pathSection: pathSection,
             middlewares: middlewares,
           );
@@ -90,18 +91,18 @@ class RadixRouter<T> {
     currentNode.value = value;
   }
 
-  Result<T>? lookup({
+  Result<T, S>? lookup({
     required HttpMethod method,
     required String path,
     bool shouldReturnParentMiddlewares = false,
   }) {
-    Node<T>? currentNode = _trees[method];
+    Node<T, S>? currentNode = _trees[method];
     if (currentNode == null) {
       return null;
     }
 
     final Map<String, String> pathParameters = {};
-    final List<T> middlewares = [];
+    final List<S> middlewares = [];
     final decodedPath = path.decodePath;
     currentNode = _lookup(
       pathSections: decodedPath.sections,
@@ -114,7 +115,7 @@ class RadixRouter<T> {
     if (value == null) {
       return null;
     }
-    return Result(
+    return Result<T, S>(
       value: value,
       pathParameters: pathParameters,
       queryParameters:
@@ -125,11 +126,11 @@ class RadixRouter<T> {
     );
   }
 
-  Node<T>? _lookup({
+  Node<T, S>? _lookup({
     required Iterable<String> pathSections,
-    required Node<T>? currentNode,
+    required Node<T, S>? currentNode,
     required Map<String, String> pathParameters,
-    required List<T> middlewares,
+    required List<S> middlewares,
   }) {
     if (pathSections.isEmpty) {
       // if empty pathSections passed throw StateError
@@ -137,7 +138,7 @@ class RadixRouter<T> {
     }
 
     final pathSection = pathSections.first;
-    Node<T>? tempNode = currentNode?.staticChildNodes[pathSection];
+    Node<T, S>? tempNode = currentNode?.staticChildNodes[pathSection];
     if (tempNode != null) {
       middlewares.addAll(tempNode.middlewares ?? []);
       if (pathSections.containsOnlyOneElement) {

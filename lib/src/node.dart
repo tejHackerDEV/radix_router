@@ -4,14 +4,14 @@ import 'package:radix_router/src/extensions/string.dart';
 import 'enum/node_type.dart';
 import 'enum/parametric_node_type.dart';
 
-class Node<T> {
+class Node<T, S> {
   final String pathSection;
   T? value;
-  final Iterable<T>? middlewares;
-  final Map<String, Node<T>> staticChildNodes = {};
-  final List<Node<T>> regExpParametricChildNodes = [];
-  Node<T>? nonRegExpParametricChild;
-  Node<T>? wildcardNode;
+  final Iterable<S>? middlewares;
+  final Map<String, Node<T, S>> staticChildNodes = {};
+  final List<Node<T, S>> regExpParametricChildNodes = [];
+  Node<T, S>? nonRegExpParametricChild;
+  Node<T, S>? wildcardNode;
 
   Node({
     required this.pathSection,
@@ -60,7 +60,7 @@ class Node<T> {
   StringBuffer _writeChildNodesBufferData(
     StringBuffer? stringBuffer, {
     required String title,
-    required Iterable<Node<T>> childNodes,
+    required Iterable<Node<T, S>> childNodes,
     required bool shouldAddTrailingComma,
   }) {
     stringBuffer ??= StringBuffer();
