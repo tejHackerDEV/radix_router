@@ -11,14 +11,14 @@ class Node<T> {
   final Map<String, Node<T>> staticChildNodes = {};
   final List<Node<T>> regExpParametricChildNodes = [];
   Node<T>? nonRegExpParametricChild;
-  Node<T>? wildcardChild;
+  Node<T>? wildcardNode;
 
   Node({
     required this.pathSection,
     this.value,
     this.middlewares,
     this.nonRegExpParametricChild,
-    this.wildcardChild,
+    this.wildcardNode,
   });
 
   NodeType get type => pathSection.nodeType;
@@ -120,7 +120,7 @@ class Node<T> {
       shouldAddTrailingComma: true,
     );
     stringBuffer.write(
-      '"nonRegExpParametricChild": $nonRegExpParametricChild, "wildcardChild": $wildcardChild',
+      '"nonRegExpParametricChild": $nonRegExpParametricChild, "wildcardNode": $wildcardNode',
     );
     return stringBuffer.toString();
   }

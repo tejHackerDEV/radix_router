@@ -69,7 +69,7 @@ class RadixRouter<T> {
           }
           break;
         case NodeType.wildcard:
-          currentNode = currentNode.wildcardChild ??= Node<T>(
+          currentNode = currentNode.wildcardNode ??= Node<T>(
             pathSection: pathSection,
             middlewares: middlewares,
           );
@@ -198,7 +198,7 @@ class RadixRouter<T> {
     }
 
     // route not found in parametricNodes so check for wildcardNode
-    tempNode = currentNode?.wildcardChild;
+    tempNode = currentNode?.wildcardNode;
     if (tempNode != null) {
       // wildcardNode found so update the pathParameters
       // & add middlewares.
