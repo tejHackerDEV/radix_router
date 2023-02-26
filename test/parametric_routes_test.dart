@@ -23,7 +23,7 @@ void main() {
         )
         ..put(
           method: httpMethod,
-          path: '/india/andhra-pradesh/{city}',
+          path: '/india/andhra-pradesh/{city}/',
           value: '$httpMethodName dynamic city',
         )
         ..put(

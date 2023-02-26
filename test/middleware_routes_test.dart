@@ -20,7 +20,7 @@ void main() {
         )
         ..put(
           method: httpMethod,
-          path: '/countries/india',
+          path: '/countries/india/',
           value: '$httpMethodName india',
           middlewares: [
             '$httpMethodName india1',
@@ -74,7 +74,7 @@ void main() {
 
         result = radixRouter.lookup(
           method: httpMethod,
-          path: '/countries/india',
+          path: '/countries/india/',
           shouldReturnParentMiddlewares: false,
         );
         expect(
@@ -93,7 +93,7 @@ void main() {
 
         result = radixRouter.lookup(
           method: httpMethod,
-          path: '/countries/afghanistan',
+          path: '/countries/afghanistan/',
         );
         expect(
           result?.value,

@@ -17,7 +17,7 @@ void main() {
         )
         ..put(
           method: httpMethod,
-          path: '/countries/india',
+          path: '/countries/india/',
           value: '$httpMethodName india',
         )
         ..put(
@@ -76,7 +76,7 @@ void main() {
 
         result = radixRouter.lookup(
           method: httpMethod,
-          path: '/countries/pakistan',
+          path: '/countries/pakistan/',
         );
         expect(
           result?.value,

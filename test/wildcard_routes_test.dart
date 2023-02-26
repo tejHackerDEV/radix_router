@@ -22,7 +22,7 @@ void main() {
         )
         ..put(
           method: httpMethod,
-          path: '/india/andhra-pradesh/kadapa/*',
+          path: '/india/andhra-pradesh/kadapa/*/',
           value: '$httpMethodName wildcard street',
         )
         ..put(
@@ -55,7 +55,7 @@ void main() {
 
         result = radixRouter.lookup(
           method: httpMethod,
-          path: '/india/2424',
+          path: '/india/2424/',
         );
         expect(
           result?.value,
@@ -81,7 +81,7 @@ void main() {
 
         result = radixRouter.lookup(
           method: httpMethod,
-          path: '/india/andhra-pradesh/kadapa/bhagya-nagar-colony',
+          path: '/india/andhra-pradesh/kadapa/bhagya-nagar-colony/',
         );
         expect(
           result?.value,

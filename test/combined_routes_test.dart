@@ -33,7 +33,7 @@ void main() {
         )
         ..put(
           method: httpMethod,
-          path: '/countries/{country}',
+          path: '/countries/{country}/',
           value: '$httpMethodName dynamic country',
         )
         ..put(

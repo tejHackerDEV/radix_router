@@ -22,7 +22,7 @@ void main() {
         )
         ..put(
           method: httpMethod,
-          path: '/{country:^[a-z]+\$}/{state:^[a-z-]+\$}',
+          path: '/{country:^[a-z]+\$}/{state:^[a-z-]+\$}/',
           value: '$httpMethod small country & state',
         )
         ..put(
@@ -73,7 +73,7 @@ void main() {
 
         result = radixRouter.lookup(
           method: httpMethod,
-          path: 'india/andhra-pradesh',
+          path: 'india/andhra-pradesh/',
         );
         expect(
           result?.value,
@@ -101,7 +101,7 @@ void main() {
 
         result = radixRouter.lookup(
           method: httpMethod,
-          path: 'india/andhra-pradesh/kadapa',
+          path: 'india/andhra-pradesh/kadapa/',
         );
         expect(
           result?.value,

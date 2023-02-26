@@ -96,8 +96,12 @@ extension StringExtension on String {
     }
     if (startIndex != -1) {
       // startIndex is not reset, so there is one last pathSection left
-      // add it to the pathSections & reset the startIndex
-      pathSections.add(substring(startIndex));
+      // add it to the pathSections, only if its not empty string
+      // & reset the startIndex.
+      final pathSection = substring(startIndex).trim();
+      if (pathSection.isNotEmpty) {
+        pathSections.add(pathSection);
+      }
       startIndex = -1;
     }
     return DecodedPath(
