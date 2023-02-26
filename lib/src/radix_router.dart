@@ -16,6 +16,7 @@ class RadixRouter<T> {
     required HttpMethod method,
     required String path,
     required T value,
+    Iterable<T>? middlewares,
   }) {
     _trees[method] ??= Node(pathSection: '/');
     Node<T> currentNode = _trees[method]!;
@@ -27,6 +28,7 @@ class RadixRouter<T> {
         case NodeType.static:
           currentNode = currentNode.staticChildNodes[pathSection] ??= Node<T>(
             pathSection: pathSection,
+            middlewares: middlewares,
             parentNode: currentNode,
           );
           break;
@@ -39,8 +41,11 @@ class RadixRouter<T> {
                       parametricChild.pathSection == pathSection);
               if (nodeInsertedAlready == null) {
                 // node in not inserted already. So insert new node
-                final nodeToInsert =
-                    Node<T>(pathSection: pathSection, parentNode: currentNode);
+                final nodeToInsert = Node<T>(
+                  pathSection: pathSection,
+                  middlewares: middlewares,
+                  parentNode: currentNode,
+                );
                 currentNode.regExpParametricChildNodes.add(nodeToInsert);
                 nodeInsertedAlready = nodeToInsert;
               }
@@ -49,6 +54,7 @@ class RadixRouter<T> {
             case ParametricNodeType.nonRegExp:
               currentNode = currentNode.nonRegExpParametricChild ??= Node<T>(
                 pathSection: pathSection,
+                middlewares: middlewares,
                 parentNode: currentNode,
               );
               break;
@@ -57,6 +63,7 @@ class RadixRouter<T> {
         case NodeType.wildcard:
           currentNode = currentNode.wildcardChild ??= Node<T>(
             pathSection: pathSection,
+            middlewares: middlewares,
             parentNode: currentNode,
           );
 
@@ -76,18 +83,24 @@ class RadixRouter<T> {
     currentNode.value = value;
   }
 
-  Result<T>? lookup({required HttpMethod method, required String path}) {
+  Result<T>? lookup({
+    required HttpMethod method,
+    required String path,
+    bool shouldReturnParentMiddlewares = false,
+  }) {
     Node<T>? currentNode = _trees[method];
     if (currentNode == null) {
       return null;
     }
 
     final Map<String, String> pathParameters = {};
+    final List<T> middlewares = [];
     final decodedPath = path.decodePath;
     currentNode = _lookup(
       pathSections: decodedPath.sections,
       currentNode: currentNode,
       pathParameters: pathParameters,
+      middlewares: middlewares,
     );
 
     final value = currentNode?.value;
@@ -99,6 +112,9 @@ class RadixRouter<T> {
       pathParameters: pathParameters,
       queryParameters:
           decodedPath.queryString?.extractQueryParameters(encoding: utf8) ?? {},
+      middlewares: !shouldReturnParentMiddlewares
+          ? currentNode?.middlewares
+          : middlewares,
     );
   }
 
@@ -106,6 +122,7 @@ class RadixRouter<T> {
     required Iterable<String> pathSections,
     required Node<T>? currentNode,
     required Map<String, String> pathParameters,
+    required List<T> middlewares,
   }) {
     if (pathSections.isEmpty) {
       // if empty pathSections passed throw StateError
@@ -115,6 +132,7 @@ class RadixRouter<T> {
     final pathSection = pathSections.first;
     Node<T>? tempNode = currentNode?.staticChildNodes[pathSection];
     if (tempNode != null) {
+      middlewares.addAll(tempNode.middlewares ?? []);
       if (pathSections.containsOnlyOneElement) {
         // as it contains only one element, simply return it
         return tempNode;
@@ -125,6 +143,7 @@ class RadixRouter<T> {
         pathSections: pathSections.skip(1),
         currentNode: tempNode,
         pathParameters: pathParameters,
+        middlewares: middlewares,
       );
     }
 
@@ -140,6 +159,7 @@ class RadixRouter<T> {
         continue;
       }
       pathParameters[tempNode.parameterName] = pathSection;
+      middlewares.addAll(tempNode.middlewares ?? []);
       if (pathSections.containsOnlyOneElement) {
         // as it contains only one element, simply return it
         return tempNode;
@@ -148,6 +168,7 @@ class RadixRouter<T> {
         pathSections: pathSections.skip(1),
         currentNode: tempNode,
         pathParameters: pathParameters,
+        middlewares: middlewares,
       );
     }
 
@@ -156,6 +177,7 @@ class RadixRouter<T> {
     if (tempNode != null) {
       // it is an non-regex, so don't check anything
       pathParameters[tempNode.parameterName] = pathSection;
+      middlewares.addAll(tempNode.middlewares ?? []);
       if (pathSections.containsOnlyOneElement) {
         // as it contains only one element, simply return it
         return tempNode;
@@ -164,6 +186,7 @@ class RadixRouter<T> {
         pathSections: pathSections.skip(1),
         currentNode: tempNode,
         pathParameters: pathParameters,
+        middlewares: middlewares,
       );
     }
 
@@ -173,8 +196,13 @@ class RadixRouter<T> {
     do {
       if (tempWildcardNode != null) {
         // wildcardNode found so update the pathParameters
-        // with the remaining pathSections & return it.
+        // with the remaining pathSections, as well as
+        // clear all middlewares & add only the wildcard middlewares.
+        //
+        // And finally return it
         pathParameters['*'] = pathSections.join('/');
+        middlewares.clear();
+        middlewares.addAll(tempWildcardNode.middlewares ?? []);
         return tempWildcardNode;
       }
       tempNode = tempNode?.parentNode;

@@ -50,6 +50,7 @@ void main() {
         expect(result?.pathParameters['*'], 'telangana');
         expect(result?.pathParameters.length, 1);
         expect(result?.queryParameters, isEmpty);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -62,6 +63,7 @@ void main() {
         expect(result?.pathParameters['*'], '2424');
         expect(result?.pathParameters.length, 1);
         expect(result?.queryParameters, isEmpty);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -74,6 +76,7 @@ void main() {
         expect(result?.pathParameters['*'], 'cuddapah');
         expect(result?.pathParameters.length, 1);
         expect(result?.queryParameters, isEmpty);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -86,6 +89,7 @@ void main() {
         expect(result?.pathParameters['*'], 'bhagya-nagar-colony');
         expect(result?.pathParameters.length, 1);
         expect(result?.queryParameters, isEmpty);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -98,6 +102,7 @@ void main() {
         expect(result?.pathParameters['*'], 'ngo-colony');
         expect(result?.pathParameters.length, 1);
         expect(result?.queryParameters, isEmpty);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -110,6 +115,7 @@ void main() {
         expect(result?.pathParameters['*'], 'apple');
         expect(result?.pathParameters.length, 1);
         expect(result?.queryParameters, isEmpty);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -122,6 +128,7 @@ void main() {
         expect(result?.pathParameters['*'], 'apple/1234');
         expect(result?.pathParameters.length, 1);
         expect(result?.queryParameters, isEmpty);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -134,6 +141,7 @@ void main() {
         expect(result?.pathParameters['*'], 'random');
         expect(result?.pathParameters.length, 1);
         expect(result?.queryParameters, isEmpty);
+        expect(result?.middlewares, isNull);
       });
     }
 

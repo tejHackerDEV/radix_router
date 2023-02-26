@@ -1,3 +1,4 @@
+import 'package:radix_router/src/extensions/iterable.dart';
 import 'package:radix_router/src/extensions/string.dart';
 
 import 'enum/node_type.dart';
@@ -6,6 +7,7 @@ import 'enum/parametric_node_type.dart';
 class Node<T> {
   final String pathSection;
   T? value;
+  final Iterable<T>? middlewares;
   final Map<String, Node<T>> staticChildNodes = {};
   final List<Node<T>> regExpParametricChildNodes = [];
   Node<T>? nonRegExpParametricChild;
@@ -15,6 +17,7 @@ class Node<T> {
   Node({
     required this.pathSection,
     this.value,
+    this.middlewares,
     this.nonRegExpParametricChild,
     this.wildcardChild,
     this.parentNode,
@@ -86,8 +89,26 @@ class Node<T> {
   @override
   String toString() {
     StringBuffer stringBuffer = StringBuffer();
-    stringBuffer.write('{"$pathSection": {');
-    stringBuffer.write('"value": ${value is! num ? '"$value"' : value}, ');
+    stringBuffer
+      ..write('{"$pathSection": {')
+      ..write('"value": ${value is! num ? '"$value"' : value}, ')
+      ..write('"middlewares": ');
+    if (middlewares != null) {
+      stringBuffer.write('[');
+      for (int i = 0; i < middlewares!.length; ++i) {
+        final middleware = middlewares!.elementAt(i);
+        stringBuffer
+            .write('${middleware is! num ? '"$middleware"' : middleware}');
+        if (!middlewares!.isLastIteration(i)) {
+          stringBuffer.write(', ');
+        }
+      }
+      stringBuffer.write('], ');
+    } else {
+      stringBuffer
+        ..write(null)
+        ..write(', ');
+    }
     _writeChildNodesBufferData(
       stringBuffer,
       title: 'staticChildNodes',

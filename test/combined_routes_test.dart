@@ -14,6 +14,11 @@ void main() {
           method: httpMethod,
           path: '/*',
           value: '$httpMethodName wildcard',
+          middlewares: [
+            '$httpMethodName wildcard middleware1',
+            '$httpMethodName wildcard middleware2',
+            '$httpMethodName wildcard middleware3',
+          ],
         )
         ..put(
           method: httpMethod,
@@ -39,6 +44,19 @@ void main() {
           method: httpMethod,
           path: '/countries/{country:\\d+\$}',
           value: '$httpMethodName dynamic number country',
+          middlewares: [
+            '$httpMethodName dynamic number country middleware1',
+            '$httpMethodName dynamic number country middleware2'
+          ],
+        )
+        ..put(
+          method: httpMethod,
+          path: '/countries/{country:\\d+\$}/states',
+          value: '$httpMethodName dynamic number country & state',
+          middlewares: [
+            '$httpMethodName dynamic number country & state middleware1',
+            '$httpMethodName dynamic number country & state middleware2'
+          ],
         );
     }
 
@@ -55,6 +73,7 @@ void main() {
         );
         expect(result?.pathParameters, isEmpty);
         expect(result?.queryParameters, isEmpty);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -66,6 +85,7 @@ void main() {
         );
         expect(result?.pathParameters, isEmpty);
         expect(result?.queryParameters, isEmpty);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -78,6 +98,7 @@ void main() {
         expect(result?.pathParameters['country'], 'pakistan');
         expect(result?.pathParameters.length, 1);
         expect(result?.queryParameters, isEmpty);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -90,6 +111,91 @@ void main() {
         expect(result?.pathParameters['country'], '2424');
         expect(result?.pathParameters.length, 1);
         expect(result?.queryParameters, isEmpty);
+        expect(result?.middlewares, [
+          '$httpMethodName dynamic number country middleware1',
+          '$httpMethodName dynamic number country middleware2'
+        ]);
+        expect(result?.middlewares?.length, 2);
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: '/countries/2424',
+          shouldReturnParentMiddlewares: true,
+        );
+        expect(
+          result?.value,
+          '$httpMethodName dynamic number country',
+        );
+        expect(result?.pathParameters['country'], '2424');
+        expect(result?.pathParameters.length, 1);
+        expect(result?.queryParameters, isEmpty);
+        expect(
+          result?.middlewares,
+          [
+            '$httpMethodName dynamic number country middleware1',
+            '$httpMethodName dynamic number country middleware2',
+          ],
+        );
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: '/countries/2424/states',
+        );
+        expect(
+          result?.value,
+          '$httpMethodName dynamic number country & state',
+        );
+        expect(result?.pathParameters['country'], '2424');
+        expect(result?.pathParameters.length, 1);
+        expect(result?.queryParameters, isEmpty);
+        expect(
+          result?.middlewares,
+          [
+            '$httpMethodName dynamic number country & state middleware1',
+            '$httpMethodName dynamic number country & state middleware2'
+          ],
+        );
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: '/countries/2424/states',
+        );
+        expect(
+          result?.value,
+          '$httpMethodName dynamic number country & state',
+        );
+        expect(result?.pathParameters['country'], '2424');
+        expect(result?.pathParameters.length, 1);
+        expect(result?.queryParameters, isEmpty);
+        expect(
+          result?.middlewares,
+          [
+            '$httpMethodName dynamic number country & state middleware1',
+            '$httpMethodName dynamic number country & state middleware2',
+          ],
+        );
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: '/countries/2424/states',
+          shouldReturnParentMiddlewares: true,
+        );
+        expect(
+          result?.value,
+          '$httpMethodName dynamic number country & state',
+        );
+        expect(result?.pathParameters['country'], '2424');
+        expect(result?.pathParameters.length, 1);
+        expect(result?.queryParameters, isEmpty);
+        expect(
+          result?.middlewares,
+          [
+            '$httpMethodName dynamic number country middleware1',
+            '$httpMethodName dynamic number country middleware2',
+            '$httpMethodName dynamic number country & state middleware1',
+            '$httpMethodName dynamic number country & state middleware2',
+          ],
+        );
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -103,6 +209,7 @@ void main() {
         expect(result?.pathParameters['*'], 'random');
         expect(result?.pathParameters.length, 2);
         expect(result?.queryParameters, isEmpty);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -116,6 +223,14 @@ void main() {
         expect(result?.pathParameters['*'], 'random');
         expect(result?.pathParameters.length, 2);
         expect(result?.queryParameters, isEmpty);
+        expect(
+          result?.middlewares,
+          [
+            '$httpMethodName wildcard middleware1',
+            '$httpMethodName wildcard middleware2',
+            '$httpMethodName wildcard middleware3',
+          ],
+        );
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -132,6 +247,14 @@ void main() {
         expect(result?.queryParameters['language'], 'telugu');
         expect(result?.queryParameters['religion'], ['hindu', 'muslim']);
         expect(result?.queryParameters.length, 2);
+        expect(
+          result?.middlewares,
+          [
+            '$httpMethodName wildcard middleware1',
+            '$httpMethodName wildcard middleware2',
+            '$httpMethodName wildcard middleware3',
+          ],
+        );
       });
     }
 

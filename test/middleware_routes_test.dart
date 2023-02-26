@@ -2,7 +2,7 @@ import 'package:radix_router/radix_router.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('Static Routes test', () {
+  group('Middleware Routes test', () {
     final radixRouter = RadixRouter<String>();
 
     final httpMethods = HttpMethod.values;
@@ -13,36 +13,23 @@ void main() {
           method: httpMethod,
           path: '/countries',
           value: '$httpMethodName countries',
+          middlewares: [
+            '$httpMethodName countries1',
+          ],
         )
         ..put(
           method: httpMethod,
           path: '/countries/india',
           value: '$httpMethodName india',
-        )
-        ..put(
-          method: httpMethod,
-          path: '/countries/pakistan',
-          value: '$httpMethodName pakistan',
+          middlewares: [
+            '$httpMethodName india1',
+            '$httpMethodName india2',
+          ],
         )
         ..put(
           method: httpMethod,
           path: '/countries/afghanistan',
           value: '$httpMethodName afghanistan',
-        )
-        ..put(
-          method: httpMethod,
-          path: '/states',
-          value: '$httpMethodName states',
-        )
-        ..put(
-          method: httpMethod,
-          path: '/states/andhra-pradesh',
-          value: '$httpMethodName andhra-pradesh',
-        )
-        ..put(
-          method: httpMethod,
-          path: '/fruits/apple',
-          value: '$httpMethodName apple',
         );
     }
 
@@ -59,7 +46,12 @@ void main() {
         );
         expect(result?.pathParameters.isEmpty, isTrue);
         expect(result?.queryParameters, isEmpty);
-        expect(result?.middlewares, isNull);
+        expect(
+          result?.middlewares,
+          [
+            '$httpMethodName countries1',
+          ],
+        );
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -71,55 +63,81 @@ void main() {
         );
         expect(result?.pathParameters.isEmpty, isTrue);
         expect(result?.queryParameters, isEmpty);
-        expect(result?.middlewares, isNull);
+        expect(
+          result?.middlewares,
+          [
+            '$httpMethodName india1',
+            '$httpMethodName india2',
+          ],
+        );
 
         result = radixRouter.lookup(
           method: httpMethod,
-          path: '/countries/pakistan',
+          path: '/countries/india',
+          shouldReturnParentMiddlewares: false,
         );
         expect(
           result?.value,
-          '$httpMethodName pakistan',
+          '$httpMethodName india',
+        );
+        expect(result?.pathParameters.isEmpty, isTrue);
+        expect(result?.queryParameters, isEmpty);
+        expect(
+          result?.middlewares,
+          [
+            '$httpMethodName india1',
+            '$httpMethodName india2',
+          ],
+        );
+
+        result = radixRouter.lookup(
+          method: httpMethod,
+          path: '/countries/afghanistan',
+        );
+        expect(
+          result?.value,
+          '$httpMethodName afghanistan',
         );
         expect(result?.pathParameters.isEmpty, isTrue);
         expect(result?.queryParameters, isEmpty);
         expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
-          method: httpMethod,
-          path: '/states',
-        );
+            method: httpMethod,
+            path: '/countries/afghanistan',
+            shouldReturnParentMiddlewares: true);
         expect(
           result?.value,
-          '$httpMethodName states',
+          '$httpMethodName afghanistan',
         );
         expect(result?.pathParameters.isEmpty, isTrue);
         expect(result?.queryParameters, isEmpty);
-        expect(result?.middlewares, isNull);
+        expect(
+          result?.middlewares,
+          [
+            '$httpMethodName countries1',
+          ],
+        );
 
         result = radixRouter.lookup(
           method: httpMethod,
-          path: '/states/andhra-pradesh',
+          path: '/countries/india',
+          shouldReturnParentMiddlewares: true,
         );
         expect(
           result?.value,
-          '$httpMethodName andhra-pradesh',
+          '$httpMethodName india',
         );
         expect(result?.pathParameters.isEmpty, isTrue);
         expect(result?.queryParameters, isEmpty);
-        expect(result?.middlewares, isNull);
-
-        result = radixRouter.lookup(
-          method: httpMethod,
-          path: '/fruits/apple',
-        );
         expect(
-          result?.value,
-          '$httpMethodName apple',
+          result?.middlewares,
+          [
+            '$httpMethodName countries1',
+            '$httpMethodName india1',
+            '$httpMethodName india2',
+          ],
         );
-        expect(result?.pathParameters.isEmpty, isTrue);
-        expect(result?.queryParameters, isEmpty);
-        expect(result?.middlewares, isNull);
       });
     }
 

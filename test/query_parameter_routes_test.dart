@@ -29,6 +29,7 @@ void main() {
         expect(result?.pathParameters.isEmpty, isTrue);
         expect(result?.queryParameters['country'], 'india');
         expect(result?.queryParameters.length, 1);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -42,6 +43,7 @@ void main() {
         expect(result?.queryParameters['country'], 'india');
         expect(result?.queryParameters['state'], 'andhra-pradesh');
         expect(result?.queryParameters.length, 2);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -54,6 +56,7 @@ void main() {
         expect(result?.pathParameters.isEmpty, isTrue);
         expect(result?.queryParameters['country'], ['india', 'pakistan']);
         expect(result?.queryParameters.length, 1);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -68,6 +71,7 @@ void main() {
         expect(result?.queryParameters['country'], ['india', 'pakistan']);
         expect(result?.queryParameters['state'], 'andhra-pradesh');
         expect(result?.queryParameters.length, 2);
+        expect(result?.middlewares, isNull);
 
         result = radixRouter.lookup(
           method: httpMethod,
@@ -83,6 +87,7 @@ void main() {
         expect(
             result?.queryParameters['state'], ['andhra-pradesh', 'telangana']);
         expect(result?.queryParameters.length, 2);
+        expect(result?.middlewares, isNull);
       });
     }
 
