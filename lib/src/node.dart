@@ -12,7 +12,6 @@ class Node<T> {
   final List<Node<T>> regExpParametricChildNodes = [];
   Node<T>? nonRegExpParametricChild;
   Node<T>? wildcardChild;
-  final Node<T>? parentNode;
 
   Node({
     required this.pathSection,
@@ -20,7 +19,6 @@ class Node<T> {
     this.middlewares,
     this.nonRegExpParametricChild,
     this.wildcardChild,
-    this.parentNode,
   });
 
   NodeType get type => pathSection.nodeType;
@@ -122,7 +120,7 @@ class Node<T> {
       shouldAddTrailingComma: true,
     );
     stringBuffer.write(
-      '"nonRegExpParametricChild": $nonRegExpParametricChild, "wildcardChild": $wildcardChild, "parentNode": ${parentNode == null ? null : '"${parentNode!.pathSection}"}}'}',
+      '"nonRegExpParametricChild": $nonRegExpParametricChild, "wildcardChild": $wildcardChild',
     );
     return stringBuffer.toString();
   }

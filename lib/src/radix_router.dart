@@ -29,7 +29,6 @@ class RadixRouter<T> {
           currentNode = currentNode.staticChildNodes[pathSection] ??= Node<T>(
             pathSection: pathSection,
             middlewares: middlewares,
-            parentNode: currentNode,
           );
           break;
         case NodeType.parametric:
@@ -44,7 +43,6 @@ class RadixRouter<T> {
                 final nodeToInsert = Node<T>(
                   pathSection: pathSection,
                   middlewares: middlewares,
-                  parentNode: currentNode,
                 );
                 currentNode.regExpParametricChildNodes.add(nodeToInsert);
                 nodeInsertedAlready = nodeToInsert;
@@ -66,7 +64,6 @@ class RadixRouter<T> {
               currentNode = currentNode.nonRegExpParametricChild ??= Node<T>(
                 pathSection: pathSection,
                 middlewares: middlewares,
-                parentNode: currentNode,
               );
               break;
           }
@@ -75,7 +72,6 @@ class RadixRouter<T> {
           currentNode = currentNode.wildcardChild ??= Node<T>(
             pathSection: pathSection,
             middlewares: middlewares,
-            parentNode: currentNode,
           );
 
           if (!pathSections.isLastIteration(i)) {
@@ -202,23 +198,16 @@ class RadixRouter<T> {
     }
 
     // route not found in parametricNodes so check for wildcardNode
-    tempNode = currentNode;
-    Node<T>? tempWildcardNode = tempNode?.wildcardChild;
-    do {
-      if (tempWildcardNode != null) {
-        // wildcardNode found so update the pathParameters
-        // with the remaining pathSections, as well as
-        // clear all middlewares & add only the wildcard middlewares.
-        //
-        // And finally return it
-        pathParameters['*'] = pathSections.join('/');
-        middlewares.clear();
-        middlewares.addAll(tempWildcardNode.middlewares ?? []);
-        return tempWildcardNode;
-      }
-      tempNode = tempNode?.parentNode;
-      tempWildcardNode = tempNode?.wildcardChild;
-    } while (tempNode != null);
+    tempNode = currentNode?.wildcardChild;
+    if (tempNode != null) {
+      // wildcardNode found so update the pathParameters
+      // & add middlewares.
+      //
+      // Finally return it
+      pathParameters['*'] = pathSections.join('/');
+      middlewares.addAll(tempNode.middlewares ?? []);
+      return tempNode;
+    }
     return null;
   }
 

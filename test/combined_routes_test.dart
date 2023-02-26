@@ -213,15 +213,14 @@ void main() {
 
         result = radixRouter.lookup(
           method: httpMethod,
-          path: '/countries/2424/random',
+          path: '/random/2424/random',
         );
         expect(
           result?.value,
           '$httpMethodName wildcard',
         );
-        expect(result?.pathParameters['country'], '2424');
-        expect(result?.pathParameters['*'], 'random');
-        expect(result?.pathParameters.length, 2);
+        expect(result?.pathParameters['*'], 'random/2424/random');
+        expect(result?.pathParameters.length, 1);
         expect(result?.queryParameters, isEmpty);
         expect(
           result?.middlewares,
@@ -235,15 +234,14 @@ void main() {
         result = radixRouter.lookup(
           method: httpMethod,
           path:
-              '/countries/2424/random?language=telugu&religion=hindu&religion=muslim',
+              '/random/2424/random?language=telugu&religion=hindu&religion=muslim',
         );
         expect(
           result?.value,
           '$httpMethodName wildcard',
         );
-        expect(result?.pathParameters['country'], '2424');
-        expect(result?.pathParameters['*'], 'random');
-        expect(result?.pathParameters.length, 2);
+        expect(result?.pathParameters['*'], 'random/2424/random');
+        expect(result?.pathParameters.length, 1);
         expect(result?.queryParameters['language'], 'telugu');
         expect(result?.queryParameters['religion'], ['hindu', 'muslim']);
         expect(result?.queryParameters.length, 2);
@@ -265,6 +263,21 @@ void main() {
           radixRouter.lookup(
             method: httpMethod,
             path: '/countries',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path: '/countries/2424/random',
+          ),
+          isNull,
+        );
+        expect(
+          radixRouter.lookup(
+            method: httpMethod,
+            path:
+                '/countries/2424/random?language=telugu&religion=hindu&religion=muslim',
           ),
           isNull,
         );
